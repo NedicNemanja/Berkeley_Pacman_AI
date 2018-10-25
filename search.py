@@ -121,12 +121,13 @@ def breadthFirstSearch(problem):
 
     while not queue.isEmpty():
         curr_node = queue.pop()
+
         if problem.isGoalState(curr_node[0]):
-            return curr_node[1]  # return path to this node
+            return curr_node[1]  # return path to goal
         else:
             for child in problem.getSuccessors(curr_node[0]):
                 if child[0] not in visited:  # for every unvisited child
-                    new_path = list(curr_node[1])  # tell this child how it got here
+                    new_path = list(curr_node[1])   #tell this child how it got here
                     new_path.append(child[1])
                     queue.push((child[0], new_path))
                     visited.add(child[0])
@@ -137,7 +138,30 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import PriorityQueue
+
+    visited = set()
+    path = []
+    pqueue = PriorityQueue()                           #priority queue will be based on least path cost
+    pqueue.push( (problem.getStartState(),path,0), 0 ) #pqueue element: (position,path to position,total cost)
+
+    while not pqueue.isEmpty():
+        curr_node = pqueue.pop()    #choose node with least cost
+
+        if curr_node[0] in visited:
+            continue
+
+        visited.add(curr_node[0])
+        if problem.isGoalState(curr_node[0]):
+            return curr_node[1] #found goal, returning optimal path
+        else:
+            for child in problem.getSuccessors(curr_node[0]):   #expand/update frontier
+                if child[0] not in visited:
+                    new_cost = curr_node[2]+child[2]    #parent cost + cost
+                    new_path = list(curr_node[1])
+                    new_path.append(child[1])           #parent path + action
+                    pqueue.update( (child[0],new_path,new_cost), new_cost)
+    #util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
     """
