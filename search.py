@@ -101,14 +101,38 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     visited = set()
     path = []
-    dfs_recursive(problem, problem.getStartState(), visited, path)
+    if not dfs_recursive(problem, problem.getStartState(), visited, path):
+        print "dfs failed to find a GoalState"
     return path
     #util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import Queue
+
+    queue = Queue()
+    visited = set()
+    path = []
+
+    start = problem.getStartState()
+    queue.push([start, path])  # queue's elements will look like this: (node,[path_to_this_node])
+    visited.add(start)
+
+    while not queue.isEmpty():
+        curr_node = queue.pop()
+        if problem.isGoalState(curr_node[0]):
+            return curr_node[1]  # return path to this node
+        else:
+            for child in problem.getSuccessors(curr_node[0]):
+                if child[0] not in visited:  # for every unvisited child
+                    new_path = list(curr_node[1])  # tell this child how it got here
+                    new_path.append(child[1])
+                    queue.push((child[0], new_path))
+                    visited.add(child[0])
+    print "bfs failed to find GoalState"
+    return path
+    #util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
