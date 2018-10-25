@@ -143,7 +143,7 @@ def uniformCostSearch(problem):
     visited = set()
     path = []
     pqueue = PriorityQueue()                           #priority queue will be based on least path cost
-    pqueue.push( (problem.getStartState(),path,0), 0 ) #pqueue element: (position,path to position,total cost)
+    pqueue.push( (problem.getStartState(),path,0.0), 0.0) #pqueue element: (position,path to position,total cost)
 
     while not pqueue.isEmpty():
         curr_node = pqueue.pop()    #choose node with least cost
@@ -173,7 +173,31 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import PriorityQueue
+
+    visited = set()
+    path = []
+    pqueue = PriorityQueue()  # priority queue will be based on least path cost
+    pqueue.push((problem.getStartState(), path, 0.0), 0.0)  # pqueue element: (position,path to position,total cost)
+
+    while not pqueue.isEmpty():
+        curr_node = pqueue.pop()    #choose node with least cost
+
+        if curr_node[0] in visited:
+            continue
+
+        visited.add(curr_node[0])
+        if problem.isGoalState(curr_node[0]):
+            return curr_node[1]  #found goal, returning optimal path
+        else:
+            for child in problem.getSuccessors(curr_node[0]):
+                if child[0] not in visited:
+                    new_cost = curr_node[2] + child[2]  # parent cost + cost
+                    heuristic_new_cost = new_cost + heuristic(child[0], problem)  # heurestic cost of the child
+                    new_path = list(curr_node[1])
+                    new_path.append(child[1])  # parent path + action
+                    pqueue.update((child[0], new_path, new_cost), heuristic_new_cost)
+    #util.raiseNotDefined()
 
 
 # Abbreviations
