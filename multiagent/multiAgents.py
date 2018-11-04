@@ -71,10 +71,26 @@ class ReflexAgent(Agent):
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
         newGhostStates = successorGameState.getGhostStates()
+        #list of scaredTimer for every ghost that counts to 0, when 0 ghost is no longer scared
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        eval = successorGameState.getScore()
+        food_weight = 2
+        ghost_dist_weight = -7
+        scared_ghost_weight = 10
+        for food in newFood.asList():
+            food_proximity = 1.0/manhattanDistance(newPos,food)
+            eval = eval + food_weight*food_proximity
+        #print eval
+        for ghost in newGhostStates:
+            if ghost.scaredTimer > 0:   #chase ghosts
+                eval += scared_ghost_weight*(1.0/(manhattanDistance(newPos,ghost.getPosition())+0.01))
+            else:   #run away from ghosts
+                eval += ghost_dist_weight*(1.0/(manhattanDistance(newPos,ghost.getPosition())+0.01))
+        #print eval
+        #print "---------------"
+        return eval
 
 def scoreEvaluationFunction(currentGameState):
     """
