@@ -297,10 +297,42 @@ def betterEvaluationFunction(currentGameState):
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+      DESCRIPTION:
+        Score feature: add currentGameState score
+        Food feature: weight*inverse_distance-to_nearest-food
+        Ghost features:
+            ghost: negative_weight*inverse-distance-to-nearest-ghost
+            scared ghost: weight*inverse-distance-to-nearest-ghost
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Useful information you can extract from a GameState (pacman.py)
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    newGhostStates = currentGameState.getGhostStates()
+
+    eval = currentGameState.getScore()
+
+    # food related
+    food_weight = 5
+    min_food_dist = float('inf')
+    for food in newFood.asList():
+        min_food_dist = min(min_food_dist,manhattanDistance(newPos, food))
+    eval += food_weight * 1.0/min_food_dist
+
+    # ghost related
+    ghost_dist_weight = -7
+    scared_ghost_weight = 13
+    # find nearest ghost
+    min_ghost_distance = float('inf')
+    for ghost in newGhostStates:
+        min_ghost_distance = min(min_ghost_distance,manhattanDistance(newPos, ghost.getPosition()))
+    #evaluate that ghost based on if hes scared or not
+    if ghost.scaredTimer > 0:  # chase ghosts
+        eval += scared_ghost_weight * (1.0 / (min_ghost_distance + 0.01))
+    else:  # run away from ghosts
+        eval += ghost_dist_weight * (1.0 / (min_ghost_distance + 0.01))
+    #print eval
+    return eval
 
 # Abbreviation
 better = betterEvaluationFunction
