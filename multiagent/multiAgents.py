@@ -178,7 +178,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 Max = result
                 max_action = action
         return max_action
-        util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
