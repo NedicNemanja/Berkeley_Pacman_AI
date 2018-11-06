@@ -76,20 +76,20 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
         eval = successorGameState.getScore()
+
+        #food related
         food_weight = 2
-        ghost_dist_weight = -7
-        scared_ghost_weight = 10
         for food in newFood.asList():
             food_proximity = 1.0/manhattanDistance(newPos,food)
             eval = eval + food_weight*food_proximity
-        #print eval
+        #ghost related
+        ghost_dist_weight = -7
+        scared_ghost_weight = 10
         for ghost in newGhostStates:
             if ghost.scaredTimer > 0:   #chase ghosts
                 eval += scared_ghost_weight*(1.0/(manhattanDistance(newPos,ghost.getPosition())+0.01))
             else:   #run away from ghosts
                 eval += ghost_dist_weight*(1.0/(manhattanDistance(newPos,ghost.getPosition())+0.01))
-        #print eval
-        #print "---------------"
         return eval
 
 def scoreEvaluationFunction(currentGameState):
@@ -145,6 +145,39 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
+        def RecursiveMinimax(agent, gameState, level):
+            """ Returns the score of the agent for gameState.
+                level is depth*numofAgents. i.e: if depth=2 and we have 3 agents the first level is 6 and the last is 1
+                at every recursion the level is decreased by one until we get to level==1.
+            """
+            if level==1 or gameState.isLose() or gameState.isWin(): #BASE CASE last level
+                return self.evaluationFunction(gameState)
+
+            if agent==0: #MAX aka pacman
+                result = -float('inf')
+                #get score for every action, and return max score
+                for action in gameState.getLegalActions(agent):
+                    result = max(result, RecursiveMinimax((agent+1)%gameState.getNumAgents(),\
+                                                        gameState.generateSuccessor(agent,action),\
+                                                        level-1))
+                return result
+            else:
+                result = float('inf')
+                #get score for every action and return min score
+                for action in gameState.getLegalActions(agent):
+                    result = min(result, RecursiveMinimax((agent+1)%gameState.getNumAgents(),\
+                                                        gameState.generateSuccessor(agent,action),\
+                                                        level-1))
+                return result
+
+        #For MAX find the best action (action with max score) and return it
+        Max = -float('inf')
+        for action in gameState.getLegalActions():
+            result = RecursiveMinimax(1,gameState.generateSuccessor(0,action),self.depth*gameState.getNumAgents())
+            if result > Max:
+                Max = result
+                max_action = action
+        return max_action
         util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
