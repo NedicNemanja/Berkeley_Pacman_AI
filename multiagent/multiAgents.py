@@ -189,6 +189,58 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+        def RecursiveABPruning(agent, gameState, level, alpha, beta):
+            """ Returns the score of the agent for gameState.
+                level is depth*numofAgents. i.e: if depth=2 and we have 3 agents the first level is 6 and the last is 1
+                at every recursion the level is decreased by one until we get to level==1.
+            """
+            #print agent,alpha, beta
+            if level==1 or gameState.isLose() or gameState.isWin(): #BASE CASE last level
+                return self.evaluationFunction(gameState)
+
+            if agent==0: #MAX aka pacman
+                result = -float('inf')
+                #get score for every action, and return max score
+                for action in gameState.getLegalActions(agent):
+                    result = max(result, RecursiveABPruning((agent+1)%gameState.getNumAgents(),\
+                                                        gameState.generateSuccessor(agent,action),\
+                                                        level-1,alpha,beta))
+                    if result > beta:
+                        #print result
+                        return result
+                    alpha = max(alpha,result)
+                #print result
+                return result
+            else:
+                result = float('inf')
+                #get score for every action and return min score
+                for action in gameState.getLegalActions(agent):
+                    result = min(result, RecursiveABPruning((agent+1)%gameState.getNumAgents(),\
+                                                        gameState.generateSuccessor(agent,action),\
+                                                        level-1,alpha,beta))
+                    if result < alpha:
+                        #print result
+                        return result
+                    beta = min(beta,result)
+                #print result
+                return result
+        # alpha-beta bounds
+        alpha = -float('inf')
+        beta = float('inf')
+        #For MAX find the best action (action with max score) and return it
+        Max = -float('inf')
+        for action in gameState.getLegalActions():
+            result = RecursiveABPruning(1,gameState.generateSuccessor(0,action),self.depth*gameState.getNumAgents(),
+                                        alpha,beta)
+            if result > Max:
+                Max = result
+                max_action = action
+            if Max > beta:
+                #print Max
+                return max_action
+            alpha = max(alpha, Max)
+        #print alpha,beta
+        return max_action
         util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
