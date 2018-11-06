@@ -161,7 +161,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                                                         gameState.generateSuccessor(agent,action),\
                                                         level-1))
                 return result
-            else:
+            else:       #Ghost
                 result = float('inf')
                 #get score for every action and return min score
                 for action in gameState.getLegalActions(agent):
@@ -211,7 +211,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     alpha = max(alpha,result)
                 #print result
                 return result
-            else:
+            else:   #Ghost
                 result = float('inf')
                 #get score for every action and return min score
                 for action in gameState.getLegalActions(agent):
@@ -224,10 +224,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     beta = min(beta,result)
                 #print result
                 return result
+
+        #For MAX find the best action (action with max score) and return it
         # alpha-beta bounds
         alpha = -float('inf')
         beta = float('inf')
-        #For MAX find the best action (action with max score) and return it
         Max = -float('inf')
         for action in gameState.getLegalActions():
             result = RecursiveABPruning(1,gameState.generateSuccessor(0,action),self.depth*gameState.getNumAgents(),
@@ -241,7 +242,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             alpha = max(alpha, Max)
         #print alpha,beta
         return max_action
-        util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -256,7 +256,41 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def RecursiveExpectimax(agent,gameState, level):
+            """ Returns the score of the agent for gameState.
+                level is depth*numofAgents. i.e: if depth=2 and we have 3 agents the first level is 6 and the last is 1
+                at every recursion the level is decreased by one until we get to level==1.
+            """
+            if level==1 or gameState.isLose() or gameState.isWin(): #BASE CASE last level
+                return self.evaluationFunction(gameState)
+
+            if agent==0: #MAX aka pacman
+                result = -float('inf')
+                # get score for every action, and return max score
+                for action in gameState.getLegalActions(agent):
+                    result = max(result, RecursiveExpectimax((agent+1)%gameState.getNumAgents(),\
+                                                        gameState.generateSuccessor(agent,action),\
+                                                        level-1))
+                return result
+            else:       #chance node
+                result = 0.0
+                probability = 1.0/len(gameState.getLegalActions(agent)) #uniform distribution
+                # get score for every action, and return max score
+                for action in gameState.getLegalActions(agent):
+                    result += probability * RecursiveExpectimax((agent+1)%gameState.getNumAgents(),\
+                                                        gameState.generateSuccessor(agent,action),\
+                                                        level-1)
+                #print result
+            return result
+
+        #For MAX find the best action (action with max score) and return it
+        Max = -float('inf')
+        for action in gameState.getLegalActions():
+            result = RecursiveExpectimax(1,gameState.generateSuccessor(0,action),self.depth*gameState.getNumAgents())
+            if result > Max:
+                Max = result
+                max_action = action
+        return max_action
 
 def betterEvaluationFunction(currentGameState):
     """
